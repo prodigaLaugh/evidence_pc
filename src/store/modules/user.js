@@ -80,14 +80,11 @@ const actions = {
       formdata.append('email', state.token)
 
       getAvatar(formdata).then(response => {
-        console.log(response,2221)
         const  data  = response
-
 
         const reader = new FileReader();
         reader.readAsDataURL(data);
         reader.onload = () => {
-          console.log(reader.result,'777')
           commit('SET_AVATAR', reader.result)
         }  
         resolve(response)

@@ -52,10 +52,7 @@
       ])
     },
     created(){
-      setTimeout(()=>{
-        this.$store.dispatch('user/getAvatar')
-      },1000)
-      
+      this.$store.dispatch('user/getAvatar')
     },
     methods: {
       toggleSideBar() {

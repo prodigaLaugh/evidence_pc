@@ -43,32 +43,20 @@ service.interceptors.response.use(
    * You can also judge the status by HTTP Status Code
    */
   response => {
-    console.log(response,1112)
     const res = response.data
     // if the custom code is not 20000, it is judged as an error.
-    if (res.error_code !== 200) {
+    if(
+      (res.type && res.size) ||
+      res.error_code === 200
+    ){
+      return res;
+    }else{
       Message({
         message: res.error_msg || 'Error',
         type: 'error',
         duration: 5 * 1000
       })
-
-      // 50008: Illegal token; 50012: Other clients logged in; 50014: Token expired;
-      if (res.error_code === 50008 || res.error_code === 50012 || res.error_code === 50014) {
-        // to re-login
-        MessageBox.confirm('You have been logged out, you can cancel to stay on this page, or log in again', 'Confirm logout', {
-          confirmButtonText: 'Re-Login',
-          cancelButtonText: 'Cancel',
-          type: 'warning'
-        }).then(() => {
-          store.dispatch('user/resetToken').then(() => {
-            location.reload()
-          })
-        })
-      }
       return Promise.reject(new Error(res.error_msg || 'Error'))
-    } else {
-      return res
     }
   },
   error => {
