@@ -29,8 +29,9 @@ export default [
     url: '/user/login',
     type: 'post',
     response: config => {
+      console.log(config,111)
       const { username } = config.body
-      const token = tokens[username]
+      const token = username
 
       // mock error
       if (!token) {
@@ -41,7 +42,7 @@ export default [
       }
 
       return {
-        code: 20000,
+        code: 200,
         data: token
       }
     }

@@ -8,13 +8,24 @@ export function login(data) {
   })
 }
 
-export function getInfo(token) {
+export function getInfo(data) {
   return request({
-    url: '/user/info',
-    method: 'get',
-    params: { token }
+    url: '/user/info/query',
+    method: 'post',
+    data
   })
 }
+
+
+export function  getAvatar( data){
+  return request({
+    url: '/user/profile/get',
+    method: 'post',
+    data,
+    responseType: 'blob'
+  })
+}
+
 
 export function logout() {
   return request({
