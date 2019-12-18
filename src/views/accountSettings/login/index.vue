@@ -56,14 +56,14 @@
       <el-row>
         <el-col :span="12">
            <el-button
-            @click.native.prevent="goUrl('register')"
+            @click.native.prevent="goUrl('sendVerificationCode?from=origin')"
             type="text">立即注册</el-button>
         </el-col>
         <el-col :span="12" style="text-align:right">
            <el-button
             type="text"
             style="color:#999"
-            @click.native.prevent="goUrl('sendVerificationCode')">忘记密码</el-button>
+            @click.native.prevent="goUrl('sendVerificationCode?from=reset')">忘记密码</el-button>
         </el-col>
       </el-row>
 

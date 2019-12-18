@@ -1,33 +1,26 @@
 <template>
   <div class="login-container">
-    <el-form
-      ref="loginForm"
-      :model="loginForm"
-      :rules="loginRules"
-      class="login-form"
-      auto-complete="on"
-      label-position="left"
-    >
+    <el-form ref="loginForm" :model="loginForm" :rules="loginRules" class="login-form" auto-complete="on" label-position="left">
 
       <div class="title-container">
-        <h3 class="title">发送验证码</h3>
+        <h3 class="title" style="padding-bottom:30px;">输入验证码</h3>
       </div>
 
-      <el-form-item prop="email">
+      <el-form-item prop="verifyCode">
         <span class="svg-container">
-          <svg-icon icon-class="user" />
+          &nbsp;
         </span>
         <el-input
-          ref="email"
-          v-model="loginForm.email"
-          placeholder="请输入邮箱"
-          name="email"
+          ref="verifyCode"
+          v-model="loginForm.verifyCode"
+          placeholder="请输入验证码"
+          name="verifyCode"
           type="text"
           tabindex="1"
-          @keyup.enter.native="_submit"
           auto-complete="on"
         />
       </el-form-item>
+
 
 
       <el-button
@@ -53,16 +46,17 @@
   import {
     validUsername
   } from '@/utils/validate'
-  import { sendVerificationCode } from '@/api/user.js'
-  import { ACCOUNTREG } from '@/utils/index.js'
+
+  import { checkVerificationCode } from '@/api/user.js'
+  import { ACCOUNTREG, PASSWORDREG } from '@/utils/index.js'
   export default {
     name: 'Login',
     data() {
-      const validateUsername = (rule, value, callback) => {
+
+
+      const validateVerifyCode = (rule, value, callback) => {
         if (!validUsername(value)) {
-          callback(new Error('请输入账号'))
-        } else if(!ACCOUNTREG.test(value.trim())){
-          callback(new Error('请输入正确的邮箱'))
+          callback(new Error('请输入验证码'))
         }else {
           callback()
         }
@@ -71,54 +65,54 @@
       return {
         checked: true,
         loginForm: {
-          email: '',
+          verifyCode: '',
         },
         loginRules: {
-          email: [{
+          verifyCode: [{
             required: true,
             trigger: 'blur',
-            validator: validateUsername
-          }],
-
+            validator: validateVerifyCode
+          }]
         },
         loading: false,
 
-
       }
     },
-
     methods: {
 
-      _submit(){
+      _submit() {
         this.$refs.loginForm.validate(valid => {
           if (valid) {
             this.loading = true
+            const query = this.$route.query;
+            const email = query.email;
+            const from = query.from;
 
-            const email = this.loginForm.email;
             var formdata = new FormData();
             formdata.append('email', email)
+             formdata.append('verifyCode', this.loginForm.verifyCode)
+            formdata.append('type', '01')
 
-            sendVerificationCode(formdata)
-              .then((data)=>{
+            checkVerificationCode(formdata)
+              .then( (data) =>{
                 if(data.error_code === 200){
-                  const from = this.$route.query.from
-                  this.$router.replace({path:'checkVerifyCode', query:{from: from, email: email} });
+                  this.$router.replace({path: '/setPassword', query:{from: from, email: email} });
+                }else{
+                  this.loading = false
                 }
-                this.loading = false
-
               })
               .catch(()=>{
                 this.loading = false
               })
+
+
 
           } else {
             console.log('error submit!!')
             return false
           }
         })
-
       }
-
     }
   }
 </script>

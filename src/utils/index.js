@@ -105,3 +105,21 @@ export function param2Obj(url) {
       '"}'
   )
 }
+
+
+/**
+ * @param {string} url
+ * @returns string
+ */
+export function getVerifyStatusText(url) {
+    const json = {
+        '00': '未认证',
+        '01': '认证中',
+        '02': '认证成功',
+        '03': '认证失败'
+    }
+    return json[key] || '未认证';    
+}
+
+export const PASSWORDREG = /^(?![\d]+$)(?![a-zA-Z]+$)(?![^\da-zA-Z]+$).{6,20}$/;
+export const ACCOUNTREG = /(^[\w.\-]+@(?:[a-z0-9]+(?:-[a-z0-9]+)*\.)+[a-z]{2,3}$)|(^1[3|4|5|8]\d{9}$)/;

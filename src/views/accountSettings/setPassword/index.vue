@@ -3,37 +3,52 @@
     <el-form ref="loginForm" :model="loginForm" :rules="loginRules" class="login-form" auto-complete="on" label-position="left">
 
       <div class="title-container">
-        <h3 class="title">重置密码</h3>
+        <h3 class="title">{{ from === 'origin' ?'设置密码' : '重置密码' }}</h3>
       </div>
 
-      <el-form-item prop="password">
+      <el-form-item prop="password1">
         <span class="svg-container">
           <svg-icon icon-class="password" />
         </span>
-        <el-input :key="passwordType" ref="password" v-model="loginForm.password" :type="passwordType" placeholder="设置密码"
-          name="password" tabindex="2" auto-complete="on" @keyup.enter.native="handleLogin" />
-        <span class="show-pwd" @click="showPwd">
-          <svg-icon :icon-class="passwordType === 'password' ? 'eye' : 'eye-open'" />
+        <el-input
+          ref="password"
+          v-model="loginForm.password1"
+          :type="passwordType1"
+          placeholder="设置密码"
+          name="password1"
+          tabindex="1"
+          auto-complete="on"/>
+        <span class="show-pwd" @click="showPwd(1)">
+          <svg-icon :icon-class="passwordType1 === 'password' ? 'eye' : 'eye-open'" />
         </span>
       </el-form-item>
-      <el-form-item prop="password">
+
+      <el-form-item prop="password2">
         <span class="svg-container">
           <svg-icon icon-class="password" />
         </span>
-        <el-input :key="passwordType" ref="password" v-model="loginForm.password" :type="passwordType" placeholder="确认密码"
-          name="password" tabindex="2" auto-complete="on" @keyup.enter.native="handleLogin" />
-        <span class="show-pwd" @click="showPwd">
-          <svg-icon :icon-class="passwordType === 'password' ? 'eye' : 'eye-open'" />
+        <el-input
+          ref="password2"
+          v-model="loginForm.password2"
+          :type="passwordType2"
+          placeholder="确认密码"
+          name="password2"
+          tabindex="2"
+          auto-complete="on"
+          @keyup.enter.native="handleLogin" />
+        <span class="show-pwd" @click="showPwd(2)">
+          <svg-icon :icon-class="passwordType2 === 'password' ? 'eye' : 'eye-open'" />
         </span>
       </el-form-item>
 
 
 
-
-
-
-
-      <el-button :loading="loading" type="primary" style="width:100%;margin-bottom:30px;" @click.native.prevent="handleLogin">设置新密码</el-button>
+      <el-button
+        :loading="loading"
+        type="primary"
+        style="width:100%;margin-bottom:30px;"
+        @click.native.prevent="_submit"
+      >{{ from === 'origin' ? '设置密码' : '重置密码' }}</el-button>
 
       <el-row>
         <el-col style="text-align:center;color:#999;font-size:14px;">
@@ -48,57 +63,71 @@
 </template>
 
 <script>
-  import {
-    validUsername
-  } from '@/utils/validate'
+  import { MessageBox, Message } from 'element-ui'
+  import { PASSWORDREG } from '@/utils/index.js'
+  import { register, retrive } from '@/api/user.js'
+  import { setToken } from '@/utils/auth'
 
   export default {
     name: 'Login',
     data() {
-      const validateUsername = (rule, value, callback) => {
-        if (!validUsername(value)) {
-          callback(new Error('请输入账号'))
+
+      const validatePassword1 = (rule, value, callback) => {
+        if (value.length < 6) {
+          callback(new Error('密码不能少于6位'))
+        }else if(!PASSWORDREG.test(value)){
+          callback(new Error('密码必须包含字母、数字或者特殊符号任意两种'))
         } else {
           callback()
         }
       }
-      const validatePassword = (rule, value, callback) => {
+
+      const validatePassword2 = (rule, value, callback) => {
         if (value.length < 6) {
           callback(new Error('密码不能少于6位'))
+        }else if(!PASSWORDREG.test(value)){
+          callback(new Error('密码必须包含字母、数字或者特殊符号任意两种'))
+        }else if(this.loginForm.password1 !== this.loginForm.password2){
+           callback(new Error('两次密码不一致'))
         } else {
           callback()
         }
       }
       return {
+        email: '',
+        from: '',
         checked: true,
         loginForm: {
-          username: 'admin',
-          password: '111111'
+          password1: '',
+          password2: ''
         },
         loginRules: {
-          username: [{
+
+          password1: [{
             required: true,
             trigger: 'blur',
-            validator: validateUsername
+            validator: validatePassword1
           }],
-          password: [{
+          password2: [{
             required: true,
             trigger: 'blur',
-            validator: validatePassword
+            validator: validatePassword2
           }]
         },
         loading: false,
-        passwordType: 'password',
+        passwordType1: 'password',
+        passwordType2: 'password',
         redirect: undefined
       }
     },
-    watch: {
-      $route: {
-        handler: function(route) {
-          this.redirect = route.query && route.query.redirect
-        },
-        immediate: true
-      }
+    created(){
+      const query = this.$route.query;
+      const email = query.email;
+      const from = query.from;
+
+      this.email = email;
+      this.from = from;
+
     },
     methods: {
       openAgreement(){
@@ -108,28 +137,56 @@
          window.open(routeUrl .href, '_blank');
       },
 
-      showPwd() {
-        if (this.passwordType === 'password') {
-          this.passwordType = ''
+      showPwd(index) {
+        if (this['passwordType'+index] === 'password') {
+          this['passwordType'+index] = ''
         } else {
-          this.passwordType = 'password'
+          this['passwordType'+index] = 'password'
         }
         this.$nextTick(() => {
           this.$refs.password.focus()
         })
       },
-      handleLogin() {
+      _submit() {
+
+        var submitFn = this.from === 'origin' ? register : retrive
+
         this.$refs.loginForm.validate(valid => {
           if (valid) {
             this.loading = true
-            this.$store.dispatch('user/login', this.loginForm).then(() => {
-              this.$router.push({
-                path: this.redirect || '/'
+
+            var formdata = new FormData()
+            formdata.append('email', this.email)
+            formdata.append('password', this.loginForm.password1)
+
+            submitFn(formdata)
+              .then((data)=>{
+                if(data.error_code === 200){
+                  var msg = this.from === 'origin' ? '设置成功' : '修改成功'
+                  Message({
+                    message: msg,
+                    type: 'success',
+                    duration: 2000
+                  })
+
+                  setTimeout(()=>{
+                    this.$store.commit('SET_TOKEN', this.email)
+                    setToken(this.email)
+
+                    this.$router.push({path: '/' });
+                  },2000)
+
+                }else{
+                  this.loading = false
+                }
+
+                
               })
-              this.loading = false
-            }).catch(() => {
-              this.loading = false
-            })
+              .catch((err)=>{
+                this.loading = false
+              })
+
+
           } else {
             console.log('error submit!!')
             return false

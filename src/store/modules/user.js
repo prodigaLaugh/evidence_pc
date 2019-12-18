@@ -1,11 +1,12 @@
-import { login, logout, getInfo, getAvatar } from '@/api/user'
+import { login, logout, getInfo, getAvatar, sendVerificationCode, queryVerifyStatus } from '@/api/user'
 import { getToken, setToken, removeToken } from '@/utils/auth'
 import { resetRouter } from '@/router'
 const state = {
   token: getToken(),
   name: '',
   avatar: '',
-  userInfo: {}
+  userInfo: {},
+  verifyStatus: ''
 }
 
 const mutations = {
@@ -20,7 +21,14 @@ const mutations = {
   },
   SET_USERINFO: (state, userInfo) => {
     state.userInfo = userInfo
-  }
+  },
+  SET_USERINFO: (state, userInfo) => {
+    state.userInfo = userInfo
+  },
+  SET_VERIFYSTATUS: (state, verifyStatus) => {
+    state.verifyStatus = verifyStatus
+  },
+
 }
 
 const actions = {
@@ -55,15 +63,29 @@ const actions = {
 
       getInfo(formdata).then(response => {
         const { data } = response
+        const { name } = data
 
-        // if (!data) {
-        //   reject('Verification failed, please Login again.')
-        // }
+        commit('SET_NAME', name)
+        commit('SET_USERINFO', data)
+        resolve(response)
+      }).catch(error => {
+        reject(error)
+      })
 
-        // const { name, avatar } = data
 
-        // commit('SET_NAME', name)
-        // commit('SET_AVATAR', avatar)
+    })
+  },
+  // get verify status
+  queryVerifyStatus({ commit, state }) {
+    return new Promise((resolve, reject) => {
+      var formdata = new FormData()
+      formdata.append('email', state.token)
+
+
+      queryVerifyStatus(formdata).then(response => {
+        const { data } = response
+
+        commit('SET_VERIFYSTATUS', data)
         resolve(response)
       }).catch(error => {
         reject(error)
@@ -82,11 +104,21 @@ const actions = {
       getAvatar(formdata).then(response => {
         const  data  = response
 
-        const reader = new FileReader();
-        reader.readAsDataURL(data);
-        reader.onload = () => {
-          commit('SET_AVATAR', reader.result)
-        }  
+        if(/text+/.test(data.type)){
+          var reader = new FileReader();//new一个FileReader实例
+          reader.onload = function() {
+            if(this.result.length>200){
+               commit('SET_AVATAR', this.result)
+            }
+          }
+          reader.readAsText(data);
+        }else{
+            const reader = new FileReader();
+            reader.readAsDataURL(data);
+            reader.onload = () => {
+              commit('SET_AVATAR', reader.result)
+            }  
+        }
         resolve(response)
       }).catch(error => {
         reject(error)
@@ -96,19 +128,21 @@ const actions = {
     })
   },
 
-
   // user logout
   logout({ commit, state }) {
-    return new Promise((resolve, reject) => {
-      logout(state.token).then(() => {
-        commit('SET_TOKEN', '')
-        removeToken()
-        resetRouter()
-        resolve()
-      }).catch(error => {
-        reject(error)
-      })
-    })
+    commit('SET_TOKEN', '')
+    removeToken()
+    resetRouter()
+    // return new Promise((resolve, reject) => {
+    //   logout(state.token).then(() => {
+    //     commit('SET_TOKEN', '')
+    //     removeToken()
+    //     resetRouter()
+    //     resolve()
+    //   }).catch(error => {
+    //     reject(error)
+    //   })
+    // })
   },
 
   // remove token

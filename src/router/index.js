@@ -37,11 +37,6 @@ export const constantRoutes = [
     hidden: true
   },
   {
-    path: '/register',
-    component: () => import('@/views/accountSettings/register/index'),
-    hidden: true
-  },
-  {
     path: '/serviceAgreement',
     component: () => import('@/views/accountSettings/serviceAgreement/index'),
     hidden: true
@@ -52,8 +47,13 @@ export const constantRoutes = [
     hidden: true
   },
   {
-    path: '/resetPassword',
-    component: () => import('@/views/accountSettings/resetPassword/index'),
+    path: '/checkVerifyCode',
+    component: () => import('@/views/accountSettings/checkVerifyCode/index'),
+    hidden: true
+  },
+  {
+    path: '/setPassword',
+    component: () => import('@/views/accountSettings/setPassword/index'),
     hidden: true
   },
 
@@ -174,10 +174,25 @@ export const constantRoutes = [
         name: 'Account',
         hidden:true,
         meta: { title: '账户管理',icon:'nested' },
-      }
+      },
+      {
+        path: 'person',
+        component: () => import('@/views/account/personalAuthentication'),
+        name: 'personalAuthentication',
+        hidden:true,
+        meta: { title: '个人认证',icon:'nested' },
+      },
+      {
+        path: 'company',
+        component: () => import('@/views/account/enterpriseCertification'), 
+        name: 'enterpriseCertification',
+        hidden:true,
+        meta: { title: '企业认证',icon:'nested' },
+      },
+
     ]
   },
-  
+
   {
     path: '/order',
     component: Layout,
@@ -192,7 +207,7 @@ export const constantRoutes = [
       }
     ]
   },
-  
+
 
 
 

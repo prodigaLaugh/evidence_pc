@@ -7,23 +7,23 @@
     <div class="right-menu">
       <el-dropdown class="avatar-container" trigger="click">
         <div class="avatar-wrapper">
-          <img :src="avatar ? avatar : require('../../assets/overview/avatar.png')" class="user-avatar">
+          <img :src="avatar ? avatar : require('../../assets/overview/avatar.png')" class="user-avatar"/>
           <i class="el-icon-caret-bottom" />
         </div>
         <el-dropdown-menu slot="dropdown" class="user-dropdown">
           <el-dropdown-item disabled>
             <div class="right-menu-avatarWrap">
-              <img src="../../assets/overview/avatar.png" alt="">
-              1dfdf
+              <img :src="avatar ? avatar : require('../../assets/overview/avatar.png')" />
+              {{name}}
             </div>
 
           </el-dropdown-item>
           <router-link to="/account">
             <el-dropdown-item divided>账户管理</el-dropdown-item>
           </router-link>
-          <router-link to="/order">
+         <!-- <router-link to="/order">
             <el-dropdown-item>订单管理</el-dropdown-item>
-          </router-link>
+          </router-link> -->
           <el-dropdown-item>
             <span style="display:block;" @click="logout">退出账号</span>
           </el-dropdown-item>
@@ -48,11 +48,13 @@
     computed: {
       ...mapGetters([
         'sidebar',
-        'avatar'
+        'avatar',
+        'name'
       ])
     },
     created(){
       this.$store.dispatch('user/getAvatar')
+      this.$store.dispatch('user/queryVerifyStatus')
     },
     methods: {
       toggleSideBar() {
