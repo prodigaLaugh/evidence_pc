@@ -71,7 +71,7 @@
   import {
     mapGetters
   } from 'vuex'
-
+  import { MessageBox, Message } from 'element-ui'
 
   import { getVerifyStatusText } from '@/utils/index.js'
   import { downloadPrivatekey } from '@/api/user.js'
@@ -93,8 +93,8 @@
       ])
     },
     created(){
-
-
+      const navIndex = this.$route.query.nav || 0
+      this.navIndex = navIndex - 0
     },
     data() {
 

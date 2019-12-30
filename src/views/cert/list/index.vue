@@ -12,7 +12,7 @@
       </div> -->
 
       <div class="containerFilterWrap">
-        <el-button type="primary" @click.native.prevent="$router.push('/cert/add')">+ 新增存证</el-button>
+        <el-button type="primary" @click.native.prevent="addEvidence">+ 新增存证</el-button>
         <div class="filterWrap">
 
           <div class="timeWrap">
@@ -110,6 +110,7 @@
 </template>
 
 <script>
+import { MessageBox, Message } from 'element-ui'
 import { mapGetters } from 'vuex'
 import { queryEvidenceList } from '@/api/depositCertificate'
 
@@ -117,6 +118,7 @@ export default {
   computed: {
     ...mapGetters([
       'userInfo',
+      'verifyStatus',
     ])
   },
   data() {
@@ -148,13 +150,35 @@ export default {
 
       list: [],
       total: 0,
-      listLoading: true
+      listLoading: true,
+
+      usageInfo: {}
     }
   },
   created() {
     this.getList()
+    this.usageInfo = JSON.parse( localStorage.usageInfo ? localStorage.usageInfo : "{}" )
   },
   methods: {
+    addEvidence(){
+      if(this.verifyStatus === '00'){
+        Message({
+          message: '请进入账户管理，完成认证！',
+          type: 'error',
+          duration: 2000
+        })
+        return;
+      }
+      if(this.usageInfo.deposit_evidence_balance_number <= 0){
+        Message({
+          message: '请扩展存证容量！',
+          type: 'error',
+          duration: 2000
+        })
+        return;
+      }
+      this.$router.push('/cert/add')
+    },
     loadData( num ){
       var num = num || 1
       this.params.offset = num -1;

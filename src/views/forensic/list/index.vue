@@ -6,7 +6,10 @@
       <div class="containerFilterWrap">
         <div>
           <!-- <el-button type="primary" @click.native.prevent="$router.push('/forensic/add')" >+ 网页取证</el-button> -->
-          <el-button type="primary" @click.native.prevent="$router.push('/forensic/addProcess')">+ 过程取证</el-button>
+          <el-button
+            type="primary"
+            @click.native.prevent="addEvidence"
+          >+ 过程取证</el-button>
         </div>
 
         <div class="filterWrap">
@@ -106,6 +109,7 @@
 </template>
 
 <script>
+import { MessageBox, Message } from 'element-ui'
 import { mapGetters } from 'vuex'
 import { queryEvidenceList } from '@/api/depositCertificate'
 import { getFuncTypeText } from '@/utils/index'
@@ -114,6 +118,7 @@ export default {
   computed: {
     ...mapGetters([
       'userInfo',
+      'verifyStatus',
     ])
   },
   filters: {
@@ -150,8 +155,28 @@ export default {
   },
   created() {
     this.getList()
+    this.usageInfo = JSON.parse( localStorage.usageInfo ? localStorage.usageInfo : "{}" )
   },
   methods: {
+    addEvidence(){
+      if(this.verifyStatus === '00'){
+        Message({
+          message: '请进入账户管理，完成认证！',
+          type: 'error',
+          duration: 2000
+        })
+        return;
+      }
+      if(this.usageInfo.obtain_evidence_balance_number <= 0){
+        Message({
+          message: '请扩展取证容量！',
+          type: 'error',
+          duration: 2000
+        })
+        return;
+      }
+      this.$router.push('/forensic/addProcess')
+    },
     loadData( num ){
       var num = num || 1
       this.params.offset = num -1;

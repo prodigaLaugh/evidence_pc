@@ -5,7 +5,8 @@
       <div class="topTips">
         <svg-icon icon-class="warn" class="icon" />
         <span>
-          温馨提示：自行上传文件进行区块链存证，M0不提供内容真实性验证；如还未下载私钥，请先<router-link to="/application/index">下载私钥</router-link>
+          温馨提示：自行上传文件进行区块链存证，M0不提供内容真实性验证；如还未下载私钥，请先
+          <router-link to="/account/index?nav=2">下载私钥</router-link>
         </span>
       </div>
 
@@ -20,7 +21,7 @@
           <el-row style="padding-top:20px;border-bottom:1px solid #ddd;margin-bottom:30px;">
             <el-col :span="colLen">
                <el-form-item label="剩余使用次数" style="margin-bottom:10px;">
-                 97次
+                 {{usageInfo.deposit_evidence_balance_number}}次
                </el-form-item>
             </el-col>
           </el-row>
@@ -230,7 +231,12 @@ export default {
 
 
       loading: false,
+
+      usageInfo: {}
     }
+  },
+  created(){
+    this.usageInfo = JSON.parse( localStorage.usageInfo ? localStorage.usageInfo : "{}" )
   },
 
   methods: {

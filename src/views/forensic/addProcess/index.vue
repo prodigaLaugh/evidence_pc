@@ -21,7 +21,7 @@
           <el-row style="padding-top:20px;border-bottom:1px solid #ddd;margin-bottom:30px;">
             <el-col :span="colLen">
                <el-form-item label="剩余使用次数" style="margin-bottom:10px;">
-                 97次
+                 {{usageInfo.obtain_evidence_balance_number}}次
                </el-form-item>
             </el-col>
           </el-row>
@@ -136,10 +136,14 @@ export default {
       videoElem: null,
       isStart: false,
       loading: false,
-      recorder: ''
+      recorder: '',
+
+      usageInfo: {}
     }
   },
   created() {
+    this.usageInfo = JSON.parse( localStorage.usageInfo ? localStorage.usageInfo : "{}" )
+
     this.$nextTick(()=>{
       this.videoElem = this.$refs.video
       console.log(this.videoElem,88)
