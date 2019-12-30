@@ -50,7 +50,8 @@ service.interceptors.response.use(
     // if the custom code is not 20000, it is judged as an error.
     if(
       (res.type && res.size) ||
-      res.error_code === 200
+      res.error_code === 200 ||
+      res.PublicKey
     ){
       return res;
     }else{

@@ -3,13 +3,13 @@
     <div class="container">
 
 
-      <div class="topTips">
+      <!-- <div class="topTips">
          <svg-icon icon-class="warn" class="icon"/>
 
         <span>
           温馨提示：存证中心只提供通过飞洛印平台上传的存证信息，通过SDK接入的存证信息请在<router-link to="/application/index">「应用中心」</router-link>查看
         </span>
-      </div>
+      </div> -->
 
       <div class="containerFilterWrap">
         <el-button type="primary" @click.native.prevent="$router.push('/cert/add')">+ 新增存证</el-button>
@@ -18,16 +18,18 @@
           <div class="timeWrap">
             <span>上链时间</span>
             <el-date-picker
-              v-model="value1"
+              v-model="time"
               type="daterange"
               range-separator="至"
               start-placeholder="开始日期"
-              end-placeholder="结束日期">
+              end-placeholder="结束日期"
+              format="yyyy年MM月dd日"
+              value-format="yyyy-MM-dd">
             </el-date-picker>
           </div>
 
           <div class="typeWrap">
-            <el-select v-model="value" placeholder="请选择">
+            <el-select v-model="searchType" placeholder="请选择">
               <el-option
                 v-for="item in options"
                 :key="item.value"
@@ -35,9 +37,9 @@
                 :value="item.value">
               </el-option>
             </el-select>
-            <el-input v-model="input" placeholder="请输入内容"></el-input>
+            <el-input v-model="searchText" placeholder="请输入内容"></el-input>
 
-            <el-button  type="primary">搜索</el-button>
+            <el-button  type="primary" @click="loadData(1)">搜索</el-button>
           </div>
         </div>
       </div>
@@ -52,43 +54,55 @@
           fit
           highlight-current-row
         >
-          <el-table-column align="center" label="存证号" width="95">
+          <el-table-column align="center" label="存证号" width="166">
             <template slot-scope="scope">
-              {{ scope.$index }}
+              {{ scope.row.access_number }}
             </template>
           </el-table-column>
 
-          <el-table-column label="存证名称" width="110" align="center">
+          <el-table-column label="存证名称"  align="center">
             <template slot-scope="scope">
-              <span>{{ scope.row.author }}</span>
+              <span>{{ scope.row.access_name }}</span>
             </template>
           </el-table-column>
           <el-table-column label="共享对象" width="110" align="center">
             <template slot-scope="scope">
-              {{ scope.row.pageviews }}
+              {{ scope.row.share_target || '--' }}
             </template>
           </el-table-column>
-          <el-table-column class-name="status-col" label="上链时间" width="110" align="center">
+          <el-table-column class-name="status-col" label="上链时间" width="160" align="center">
             <template slot-scope="scope">
-              <el-tag :type="scope.row.status | statusFilter">{{ scope.row.status }}</el-tag>
+              {{scope.row.access_date}}
             </template>
           </el-table-column>
           <el-table-column align="center" prop="created_at" label="存证来源" width="200">
             <template slot-scope="scope">
-              <i class="el-icon-time" />
-              <span>{{ scope.row.display_time }}</span>
+              <span>{{ scope.row.asscess_source || '--'}}</span>
             </template>
           </el-table-column>
           <el-table-column label="操作">
-            <div class="operBtnWrap">
-              <span  @click="$router.push('/cert/detail')">详情</span>
-              <span class="line"></span>
-              <span>分享</span>
-              <span class="line"></span>
-              <span>更多</span>
-            </div>
+            <template slot-scope="scope">
+             <div class="operBtnWrap">
+               <span  @click="$router.push({path:'/cert/detail', query: {accessNumber: scope.row.access_number} })">详情</span>
+               <span class="line"></span>
+               <!-- <span>分享</span>
+               <span class="line"></span> -->
+               <span>查看确认函</span>
+             </div>
+            </template>
+
           </el-table-column>
         </el-table>
+
+        <div class="paginationWrap" v-if="total">
+          <el-pagination
+            background
+            layout="prev, pager, next"
+            @current-change="loadData"
+            :total="total">
+          </el-pagination>
+        </div>
+
       </div>
 
     </div>
@@ -96,54 +110,99 @@
 </template>
 
 <script>
-import { getList } from '@/api/table'
+import { mapGetters } from 'vuex'
+import { queryEvidenceList } from '@/api/depositCertificate'
 
 export default {
-  filters: {
-    statusFilter(status) {
-      const statusMap = {
-        published: 'success',
-        draft: 'gray',
-        deleted: 'danger'
-      }
-      return statusMap[status]
-    }
+  computed: {
+    ...mapGetters([
+      'userInfo',
+    ])
   },
   data() {
     return {
-      value1: '',
+      params:{
+        offset: 0,
+        limit: 20,
+        funcType:['05', '06'],
+      },
+      executeChainStartDate: '',
+      executeChainEndDate: '',
+      time: '',
+      searchType: 'accessNumber',
       options: [{
-        value: '选项1',
-        label: '黄金糕'
+        value: 'accessNumber',
+        label: '存证号'
       }, {
-        value: '选项2',
-        label: '双皮奶'
+        value: 'accessName',
+        label: '存证名称'
       }, {
-        value: '选项3',
-        label: '蚵仔煎'
+        value: 'shareTarget',
+        label: '共享对象'
       }, {
-        value: '选项4',
-        label: '龙须面'
-      }, {
-        value: '选项5',
-        label: '北京烤鸭'
+        value: 'asscessSource',
+        label: '存证来源'
       }],
-      value: '',
-      list: null,
+
+      searchText: '',
+
+      list: [],
+      total: 0,
       listLoading: true
     }
   },
   created() {
-    this.fetchData()
+    this.getList()
   },
   methods: {
-    fetchData() {
+    loadData( num ){
+      var num = num || 1
+      this.params.offset = num -1;
+      this.getList()
+    },
+    getParams(){
+      const { offset, limit, funcType } = this.params
+      var newOffset = offset * limit
+      var formdata = new FormData()
+
+      if(this.time){
+        var executeChainStartDate = this.time[0]
+        var executeChainEndDate = this.time[1];
+        formdata.append('executeChainStartDate', executeChainStartDate)
+        formdata.append('executeChainEndDate', executeChainEndDate)
+      }
+      var searchText = this.searchText.trim()
+      if(searchText){
+        formdata.append(this.searchType, searchText)
+      }
+      formdata.append('email', this.userInfo.email)
+      formdata.append('offset', newOffset)
+      formdata.append('limit', limit)
+      formdata.append('funcType', funcType.join('&'))
+      return formdata;
+    },
+    getList(){
+
+      var formdata = this.getParams()
       this.listLoading = true
-      getList().then(response => {
-        this.list = response.data.items
-        this.listLoading = false
-      })
-    }
+
+      queryEvidenceList(formdata)
+        .then((data)=>{
+          if(data.error_code === 200 && data.rows){
+            const list = data.rows
+            this.list.splice(0, 999, ...list)
+            this.total = data.total
+          }else{
+            this.list.splice(0,999)
+          }
+          this.listLoading = false
+        })
+        .catch(()=>{
+          this.list.splice(0,999)
+          this.listLoading = false
+        })
+    },
+
   }
 }
 </script>

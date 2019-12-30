@@ -17,10 +17,7 @@ export default {
       type: String,
       required: true
     },
-    rightText: {
-      type: String,
-      default: ''
-    }
+    rightText: [String]
   }
 
 }

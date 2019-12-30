@@ -1,92 +1,103 @@
 <template>
   <div class="dashboard-container">
     <el-row class="personInfoWrap">
-      <el-col span="12" class="personWrap">
+      <el-col :span="12" class="personWrap">
         <div class="imageWrap">
-          <img src="../../assets/overview/avatar.png" alt="" class="image">
+          <img :src="avatar ? avatar : require('@/assets/overview/avatar.png')" alt="" class="image">
         </div>
         <div class="person">
           <div class="nameWrap">
-            <span>Hi，flNNur2Q</span>
-            <span>企业认证</span>
+            <span>Hi，{{userInfo.name}}</span>
+            <span>{{ userInfo.verify_type === 1 ? '企业认证' : '个人认证'}}</span>
           </div>
-          <div class="time">今天是11月27日，周三，欢迎回到飞洛印~</div>
+          <div class="time">今天是{{time}}，周{{week}}，欢迎回到M0~</div>
         </div>
       </el-col>
 
-      <el-col span="12">
+      <!-- <el-col :span="12">
         <div class="gzWrap">
           <div>3</div>
           <div>当前申请公证</div>
         </div>
-      </el-col>
+      </el-col> -->
     </el-row>
 
-    <el-row class="centerWrap" :gutter="20">
-      <el-col span="12">
+    <el-row class="centerWrap" :gutter="20"  v-loading="listLoading">
+      <el-col :span="12">
         <div class="pieOuterWrap">
           <div class="titleWrap">
             <div>存证使用情况</div>
             <div>
-              <el-button style="color:#2d7feb" size="small">新增存证</el-button>
-              <el-button type="primary" size="small">扩展容量</el-button>
+              <el-button
+                style="color:#2d7feb"
+                size="small"
+                @click="$router.push('/cert/add')">新增存证</el-button>
+              <el-button
+                type="primary"
+                size="small"
+                 @click="$router.push('/buyPlan?type=1')"
+              >扩展容量</el-button>
             </div>
           </div>
           <div class="pieWrap">
-            <div id="pie" >
+            <div id="pieChart1" >
 
             </div>
             <ul>
               <li>
                 <span>文件存证</span>
-                <span>2条</span>
+                <span>{{usageInfo.file_evidence_number}}条</span>
               </li>
               <li>
                 <span>内容存证</span>
-                <span>2条</span>
+                <span>{{usageInfo.content_evidence_number}}条</span>
               </li>
-              <li>
+              <!-- <li>
                 <span>应用存证</span>
                 <span>2条</span>
-              </li>
+              </li> -->
               <li>
                 <span>存证余量</span>
-                <span>2条</span>
+                <span>{{usageInfo.deposit_evidence_balance_number}}条</span>
               </li>
             </ul>
           </div>
         </div>
       </el-col>
 
-      <el-col span="12">
+      <el-col :span="12">
         <div class="pieOuterWrap">
           <div class="titleWrap">
             <div>取证使用情况</div>
             <div>
-              <el-button style="color:#2d7feb" size="small">新增取证</el-button>
-              <el-button type="primary" size="small">扩展容量</el-button>
+              <!-- <el-button style="color:#2d7feb" size="small">新增取证</el-button> -->
+              <el-button
+                type="primary"
+                size="small"
+                @click="$router.push('/buyPlan?type=2')"
+              >扩展容量</el-button>
             </div>
           </div>
           <div class="pieWrap">
-            <div id="main" >
+            <div id="pieChart2" >
 
             </div>
             <ul>
-              <li>
-                <span>文件存证</span>
-                <span>2条</span>
+             <li>
+                <span>取证中</span>
+                <span>{{usageInfo.obtain_evidence_onging_number}}条</span>
               </li>
               <li>
-                <span>内容存证</span>
-                <span>2条</span>
+                <span>取证成功</span>
+                <span>{{usageInfo.obtain_evidence_success_number}}条</span>
               </li>
               <li>
-                <span>应用存证</span>
-                <span>2条</span>
+                <span>取证失败</span>
+                <span>{{usageInfo.obtain_evidence_failure_numbe}}条</span>
               </li>
               <li>
-                <span>存证余量</span>
-                <span>2条</span>
+                <span>取证余量</span>
+                <span>{{usageInfo.obtain_evidence_balance_number}}条</span>
               </li>
             </ul>
           </div>
@@ -95,7 +106,7 @@
 
     </el-row>
 
-    <el-row>
+    <!-- <el-row>
       <el-col>
         <div class="applycationWrap">
           <div class="title">应用中心</div>
@@ -139,26 +150,95 @@
         </div>
       </el-col>
     </el-row>
-
+ -->
   </div>
 </template>
 
 <script>
+import echarts from 'echarts'
 import { mapGetters } from 'vuex'
+import { queryUsageStatistics } from '@/api/overview.js'
 
 export default {
   name: 'Dashboard',
   computed: {
     ...mapGetters([
-      'name'
+      'avatar',
+      'userInfo',
     ])
   },
+  data(){
+    return {
+      time: '',
+      week: '',
+      usageInfo: {},
+      listLoading: true
+    }
+  },
   created(){
-    this.$nextTick(()=>{
-      var echarts = require('echarts');
+    var date = new Date();
+    var month = date.getMonth()+1;
+    month = month < 10 ? '0' + month : month
+    var day = date.getDate()
+    day = day < 10 ? '0' + day : day,
+    this.time = month + '月' + day + '日'
 
+    var week = date.getDay();
+    var weekJson = {
+      1:'一',
+      2:'二',
+      3:'三',
+      4:'四',
+      5:'五',
+      6:'六',
+      7:'日'
+    }
+    var newWeek = weekJson[week]
+
+    this.week = newWeek
+
+    this.getStatistics()
+
+
+
+  },
+
+  methods:{
+
+    getStatistics(){
+      var formdata = new FormData()
+      formdata.append('email', this.userInfo.email)
+      queryUsageStatistics(formdata)
+        .then((data)=>{
+          if(data.error_code === 200){
+            this.usageInfo = data.data;
+            localStorage.usageInfo = JSON.stringify(this.usageInfo)
+            const lists1 = [
+                    {value:this.usageInfo.file_evidence_number, name:'文件存证'},
+                    {value:this.usageInfo.content_evidence_number, name:'内容存证'},
+                    {value:this.usageInfo.deposit_evidence_balance_number, name:'存证余量'},
+                  ]
+            const lists2 = [
+                    {value:this.usageInfo.obtain_evidence_onging_number, name:'取证中'},
+                    {value:this.usageInfo.obtain_evidence_success_number, name:'取证成功'},
+                    {value:this.usageInfo.obtain_evidence_failure_numbe, name:'取证失败'},
+                    {value:this.usageInfo.obtain_evidence_balance_number, name:'取证余量'},
+                  ]
+
+
+            this.getPie('pieChart1', '存证使用情况', lists1)
+            this.getPie('pieChart2', '取证使用情况', lists2)
+          }
+          this.listLoading = false;
+
+        })
+        .catch(()=>{
+          this.listLoading = false;
+        })
+    },
+    getPie(id, title, data){
       // 基于准备好的dom，初始化echarts实例
-      var myChart = echarts.init(document.getElementById('pie'));
+      var myChart = echarts.init(document.getElementById(id));
       const options  = {
           tooltip: {
               trigger: 'item',
@@ -167,7 +247,7 @@ export default {
 
           series: [
             {
-                name:'存证使用情况',
+                name:title,
                 type:'pie',
                 radius: ['50%', '70%'],
                 avoidLabelOverlap: false,
@@ -189,19 +269,14 @@ export default {
                         show: false
                     }
                 },
-                data:[
-                    {value:335, name:'文件存证'},
-                    {value:310, name:'内容存证'},
-                    {value:234, name:'应用存证'},
-                    {value:135, name:'存证余量'},
-                ]
+                data: data
             }
         ]
 
       };
       // 绘制图表
       myChart.setOption(options);
-    })
+    },
 
   }
 }

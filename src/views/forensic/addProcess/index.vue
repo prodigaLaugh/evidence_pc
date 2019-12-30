@@ -10,7 +10,13 @@
       </div>
 
       <div class="formWrap">
-        <el-form ref="form" :model="form" label-width="180px" label-position="left">
+        <el-form
+          ref="addParams"
+          label-width="180px"
+          label-position="left"
+          :model="addParams"
+          :rules="addRules"
+        >
 
           <el-row style="padding-top:20px;border-bottom:1px solid #ddd;margin-bottom:30px;">
             <el-col :span="colLen">
@@ -23,15 +29,18 @@
           <el-row>
             <el-col :span="colLen">
                <el-form-item label="区块链配置">
-                 <el-input v-model="form.name"></el-input>
+                 <el-input value="M0" disabled="disabled"></el-input>
                </el-form-item>
             </el-col>
           </el-row>
 
           <el-row>
             <el-col :span="colLen">
-               <el-form-item label="取证名称">
-                 <el-input v-model="form.name"></el-input>
+               <el-form-item label="取证名称" prop="accessName">
+                 <el-input
+                  v-model="addParams.accessName"
+                  placeholder="请输入取证名称"
+                ></el-input>
                </el-form-item>
             </el-col>
           </el-row>
@@ -39,19 +48,21 @@
 
           <el-row>
             <el-col :span="colLen">
-               <el-form-item label="私钥签名">
-                <el-upload
-                  class="upload-demo"
-                  action="https://jsonplaceholder.typicode.com/posts/"
-                  :on-preview="handlePreview"
-                  :on-remove="handleRemove"
-                  :before-remove="beforeRemove"
-                  multiple
-                  :limit="3"
-                  :on-exceed="handleExceed"
-                  :file-list="fileList">
-                  <el-button size="small" type="primary">上传私钥</el-button>
-                </el-upload>
+               <el-form-item label="私钥签名" prop="privateKeyFile">
+
+                <el-button
+                  size="small"
+                  @click="triggerFile('privateKeyFile')"
+                  type="primary"
+                >上传私钥</el-button>
+                 <div style="font-size:12px;color:#999;line-height:14px;">{{privateKeyFile}}</div>
+                <input
+                  type="file"
+                  style="display:none"
+                  ref="privateKeyFile"
+                  @change="selectFile('privateKeyFile', $event)"
+                />
+
                </el-form-item>
             </el-col>
           </el-row>
@@ -59,7 +70,8 @@
           <el-row>
             <el-col :span="colLen">
                <el-form-item label="">
-                <el-button>开始</el-button>
+                <el-button @click="start" v-if="!isStart">开始</el-button>
+                <el-button @click="complete" :loading="loading" v-else>完成</el-button>
                 <el-button @click.native.prevent="$router.go(-1)">返回</el-button>
                </el-form-item>
             </el-col>
@@ -75,35 +87,165 @@
 </template>
 
 <script>
-
-
+import RecordRTC from 'recordrtc'
+import { MessageBox, Message } from 'element-ui'
+import { mapGetters } from 'vuex'
+import { validUsername } from '@/utils/validate'
+import { uploadEvidence } from '@/api/depositCertificate'
 export default {
-
+  computed: {
+    ...mapGetters([
+      'userInfo',
+    ])
+  },
   data() {
-    return {
-      colLen:13,
-      form:{
-        name:'',
-        fileList:[]
+    const validateAccessName = (rule, value, callback) => {
+      if (!validUsername(value)) {
+        callback(new Error('请输入取证名称'))
+      } else {
+        callback()
       }
+    }
+
+    const validatePrivateKeyFile = (rule, value, callback) => {
+      if (!value) {
+        callback(new Error('请上传私钥文件'))
+      } else {
+        callback()
+      }
+    }
+
+    return {
+      colLen: 13,
+
+      addParams: {
+        accessName: '',
+        evidenceFile: '',
+        privateKeyFile: '',
+        funcType: '08'
+      },
+
+      privateKeyFile: '',
+      addRules: {
+        accessName: [{ required: true, trigger: 'blur', validator: validateAccessName }],
+        privateKeyFile: [{ required: true, trigger: 'blur', validator: validatePrivateKeyFile }],
+
+      },
+      index: 0,
+
+      videoElem: null,
+      isStart: false,
+      loading: false,
+      recorder: ''
     }
   },
   created() {
+    this.$nextTick(()=>{
+      this.videoElem = this.$refs.video
+      console.log(this.videoElem,88)
+    })
 
   },
   methods: {
-    handleRemove(file, fileList) {
-      console.log(file, fileList);
+    start(){
+      this.isStart = true
+      this.getScreenStream((screen)=> {
+          var recordingHints = {
+              type: 'video'
+          };
+          // initiating the recorder
+          this.recorder = RecordRTC(screen, recordingHints);
+          // starting recording here
+          this.recorder.startRecording();
+      })
+
     },
-    handlePreview(file) {
-      console.log(file);
+
+    getScreenStream(callback) {
+        if (navigator.getDisplayMedia) {
+            navigator.getDisplayMedia({
+                video: true
+            }).then(screenStream => {
+                callback(screenStream);
+            });
+        } else if (navigator.mediaDevices.getDisplayMedia) {
+            navigator.mediaDevices.getDisplayMedia({
+                video: true
+            }).then(screenStream => {
+                callback(screenStream);
+            });
+        } else {
+            alert('getDisplayMedia API is not supported by this browser.');
+        }
     },
-    handleExceed(files, fileList) {
-      this.$message.warning(`当前限制选择 3 个文件，本次选择了 ${files.length} 个文件，共选择了 ${files.length + fileList.length} 个文件`);
+    triggerFile(dom){
+      this.$refs[dom].click()
     },
-    beforeRemove(file, fileList) {
-      return this.$confirm(`确定移除 ${ file.name }？`);
+    selectFile(dom, e){
+      var upload = this.$refs[dom];
+
+      var file = upload.files[0]
+      this[dom] = file.name;
+      this.addParams[dom] = file;
+
+    },
+    complete(){
+      this.recorder.stopRecording(() => {
+
+          var blob = this.recorder.getBlob();
+          var fileName = new Date().getTime();
+          var fileObject = new File([blob], fileName, {
+              type: 'video/webm'
+          });
+          this.addParams.evidenceFile = fileObject
+          this.submit()
+      });
+
+
+    },
+    getParams(){
+      var formdata = new FormData()
+      formdata.append('email', this.userInfo.email)
+      formdata.append('accessName', this.addParams.accessName)
+      formdata.append('privateKeyFile', this.addParams.privateKeyFile)
+      formdata.append('evidenceFile', this.addParams.evidenceFile)
+
+      formdata.append('funcType', this.addParams.funcType)
+      return formdata
+
+    },
+    submit(){
+      var formdata = this.getParams()
+      this.$refs.addParams.validate(valid => {
+        if (valid) {
+          this.loading = true
+          var formdata = this.getParams()
+
+          uploadEvidence(formdata)
+            .then((data)=>{
+              if(data.error_code === 200){
+                Message({
+                  message: '提交成功',
+                  type: 'success',
+                  duration: 2000
+                })
+
+                setTimeout(()=>{
+                  this.$router.go(-1)
+                }, 2000);
+              }
+              this.loading = false
+            })
+            .catch(()=>{
+              this.loading = false
+            })
+        }else{
+          console.log('error submit!!')
+          return false
+        }
+      })
     }
+
   }
 }
 </script>

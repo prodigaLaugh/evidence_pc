@@ -29,27 +29,27 @@
 
         <div class="downloadWrap" v-show="navIndex===2">
 
-          <div class="download" >
+          <div class="download" v-if="!publicAddress">
             <div class="topTips">
                <svg-icon icon-class="warn" class="icon"/>
               <span>
                 温馨提示：私钥是您在区块链的身份标识，请注意保管！
               </span>
             </div>
-            <el-button 
-              style="margin-top:20px" 
+            <el-button
+              style="margin-top:20px"
               type="primary"
               @click="download">下载私钥</el-button>
           </div>
 
-          <div class="download">
+          <div class="download" v-else>
             <div class="topTips">
-               <svg-icon icon-class="warn" class="icon"/>
+              <svg-icon icon-class="warn" class="icon"/>
               <span>
                 温馨提示：您已经下载过私钥并绑定公钥地址，<router-link to="">如果私钥丢失，请联系杨坤团队！!</router-link>
               </span>
             </div>
-            <p>公钥地址ec0cbf134505c4e182c621b7d243114e138c78cf</p>
+            <p>公钥地址 {{publicAddress}}</p>
           </div>
 
 
@@ -88,7 +88,8 @@
         'sidebar',
         'avatar',
         'userInfo',
-        'verifyStatus'
+        'verifyStatus',
+        'publicAddress'
       ])
     },
     created(){
@@ -113,11 +114,41 @@
         this[key] = val;
       },
       download(){
+        if(this.verifyStatus === '00'){
+          Message({
+            message: '未认证或者认证未通过无法下载私钥，请先前往认证。',
+            type: 'error',
+            duration: 2000
+          })
+          return;
+        }
         var formdata = new FormData()
         formdata.append('email', this.userInfo.email)
         downloadPrivatekey(formdata)
           .then((data)=>{
-            console.log(data,888)
+
+            const Address = data.Address
+
+            localStorage.publicAddress = Address
+            this.$store.commit('user/SET_PUBLICADRESS', Address)
+
+             exportRaw('privatekey.json', JSON.stringify(data))
+
+            function fakeClick(obj) {
+              var ev = document.createEvent("MouseEvents");
+              ev.initMouseEvent("click", true, false, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);
+              obj.dispatchEvent(ev);
+            }
+
+            function exportRaw(name, data) {
+              var urlObject = window.URL || window.webkitURL || window;
+              var export_blob = new Blob([data]);
+              var save_link = document.createElementNS("http://www.w3.org/1999/xhtml", "a")
+              save_link.href = urlObject.createObjectURL(export_blob);
+              save_link.download = name;
+              fakeClick(save_link);
+            }
+
           })
       }
 

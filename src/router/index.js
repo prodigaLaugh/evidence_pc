@@ -144,24 +144,24 @@ export const constantRoutes = [
     ]
   },
 
-  {
-    path: '/application',
-    component: Layout,
-    redirect: '/application',
-    // name: 'Nested',
-    // meta: {
-    //   title: '应用中心',
-    //   icon: 'nested'
-    // },
-    children: [
-      {
-        path: 'index',
-        component: () => import('@/views/application/list/index'), // Parent router-view
-        name: 'Application',
-        meta: { title: '应用中心',icon:'nested' },
-      }
-    ]
-  },
+  // {
+  //   path: '/application',
+  //   component: Layout,
+  //   redirect: '/application',
+  //   // name: 'Nested',
+  //   // meta: {
+  //   //   title: '应用中心',
+  //   //   icon: 'nested'
+  //   // },
+  //   children: [
+  //     {
+  //       path: 'index',
+  //       component: () => import('@/views/application/list/index'), // Parent router-view
+  //       name: 'Application',
+  //       meta: { title: '应用中心',icon:'nested' },
+  //     }
+  //   ]
+  // },
 
   {
     path: '/account',
@@ -204,6 +204,20 @@ export const constantRoutes = [
         name: 'Order',
         hidden:true,
         meta: { title: '订单管理',icon:'nested' },
+      }
+    ]
+  },
+  {
+    path: '/buyPlan',
+    component: Layout,
+    redirect: '/buyPlan/index',
+    children: [
+      {
+        path: 'index',
+        component: () => import('@/views/buyPlan'), // Parent router-view
+        name: 'buyPlan',
+        hidden:true,
+        meta: { title: '扩展容量',icon:'nested' },
       }
     ]
   },

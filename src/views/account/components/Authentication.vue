@@ -246,8 +246,8 @@ export default {
         margin-bottom: 24px;
 
         img {
-          width: 32px;
-          margin-right: 16px;
+          width: 24px;
+          margin-right: 12px;
         }
       }
 

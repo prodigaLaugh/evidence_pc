@@ -19,6 +19,7 @@ body {
   font-family: Helvetica Neue, Helvetica, PingFang SC, Hiragino Sans GB, Microsoft YaHei, Arial, sans-serif;
   font-size:14px;
   background:#F5F6F7;
+  min-width:1200px;
 }
 
 label {
@@ -137,7 +138,7 @@ div:focus {
         }
         .el-date-editor{
           border-radius:0 4px 4px 0;
-          width:220px;
+          width:270px;
           margin-right:10px;
         }
       }
@@ -172,6 +173,7 @@ div:focus {
     align-items: center;
     >span{
       color: $color_blue;
+      cursor:pointer;
       &.line{
         margin: 0px 10px;
         position: relative;
@@ -231,12 +233,19 @@ div:focus {
 
     p {
       padding: 10px 20px;
-      width: 50%;
+      width: 60%;
       display: inline-block;
       margin: 0;
       text-overflow: ellipsis;
       white-space: nowrap;
       line-height: 1.4;
+      overflow:hidden;
     }
   }
+}
+
+//pagination
+.paginationWrap{
+  text-align:right;
+  padding-top:20px;
 }

@@ -127,7 +127,6 @@ export function downloadPrivatekey(data) {
     url: '/evidence/keys/file/download',
     method: 'post',
     data,
-    responseType: 'blob'
   })
 }
 

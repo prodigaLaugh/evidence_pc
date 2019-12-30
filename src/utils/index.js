@@ -121,5 +121,19 @@ export function getVerifyStatusText(url) {
     return json[key] || '未认证';    
 }
 
+export function getFuncTypeText(val){  // get funcType text
+    var json = {
+        "01": '录音取证',
+        "02": '录像取证',
+        "03": '拍照取证',
+        "04": '录屏取证',
+        "05": '文件存证',
+        "06": '内容存证',
+        "07": '网页取证',
+        "08": '过程取证'
+    }
+    return json[val]
+}
+
 export const PASSWORDREG = /^(?![\d]+$)(?![a-zA-Z]+$)(?![^\da-zA-Z]+$).{6,20}$/;
 export const ACCOUNTREG = /(^[\w.\-]+@(?:[a-z0-9]+(?:-[a-z0-9]+)*\.)+[a-z]{2,3}$)|(^1[3|4|5|8]\d{9}$)/;

@@ -6,7 +6,8 @@ const state = {
   name: '',
   avatar: '',
   userInfo: {},
-  verifyStatus: ''
+  verifyStatus: '',
+  publicAddress: localStorage.publicAddress || ''
 }
 
 const mutations = {
@@ -27,6 +28,9 @@ const mutations = {
   },
   SET_VERIFYSTATUS: (state, verifyStatus) => {
     state.verifyStatus = verifyStatus
+  },
+  SET_PUBLICADRESS: (state, publicAddress) => {
+    state.publicAddress = publicAddress
   },
 
 }

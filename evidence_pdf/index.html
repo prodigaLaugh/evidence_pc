@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset=utf-8>
+		<meta name=viewport content="width=device-width,initial-scale=1">
+		<title>webiew</title>
+		<style>
+			* {
+				padding: 0;
+				margin: 0;
+				font-size: 14px;
+				list-style: none;
+				text-align: center;
+				box-sizing: border-box;
+			}
+
+			body {
+				width: 100%;
+				padding:20px;
+				margin: 0 auto;
+				overflow-x:auto;
+			}
+			body img{
+				width:100%;
+			}
+
+			.list {
+				padding-left: 40px;
+				padding: 10px 0;
+				position: relative;
+			}
+
+			.left {
+				position: absolute;
+				left: 0;
+				top: 10px;
+				width: 140px;
+				font-weight: bold;
+				text-align: left;
+				font-size: 16px;
+			}
+
+			.right {
+				margin-left: 140px;
+				width: 420px;
+				text-align: left;
+				font-size: 16px;
+				word-break: break-all;
+			}
+		</style>
+		<script src="./js/fileSave.js"></script>
+		<script src="./js/html2canvas.min.js"></script>
+		<script src="//cdnjs.cloudflare.com/ajax/libs/jspdf/1.5.3/jspdf.debug.js" integrity="sha384-NaWTHo/8YCBYJ59830LTz/P4aQZK1sS0SneOgAvhsIl3zBu8r9RevNg5lHCHAuQ/"
+		 crossorigin="anonymous"></script>
+		<script src="//cdn.bootcss.com/jquery/3.4.0/jquery.min.js"></script>
+
+	</head>
+	<body>
+
+		<div id="content"></div>
+
+	</body>
+
+
+
+	<script>
+		function IsPC() {
+		   var userAgentInfo = navigator.userAgent;
+		   var Agents = new Array("Android", "iPhone", "SymbianOS", "Windows Phone", "iPad", "iPod");
+		   var flag = true;
+		   for (var v = 0; v < Agents.length; v++) {
+				if (userAgentInfo.indexOf(Agents[v]) > 0) {
+					flag = false;
+					break;
+				 }
+		   }
+		   return flag;
+		}
+		$(function() {
+			
+			if(IsPC()){
+				$('body').css({width:'600px',margin:'0 auto'})
+			}
+			
+			var search = window.location.search;
+			var fileType = search.replace(/.*(?:fileType=)([^&]*)(.*)?/,'$1')
+			var email = search.replace(/.*(?:email=)([^&]*)(.*)?/,'$1')
+			var accessNumber = search.replace(/.*(?:accessNumber=)([^&]*)(.*)?/,'$1')
+
+			var formdata = new FormData()
+			formdata.append('email', email)
+			formdata.append('accessNumber', accessNumber)
+			
+			
+			
+			if(fileType){
+				downloadFile(formdata, fileType)
+			}else{
+				downloadPdf(formdata)
+			}
+
+
+
+
+		})
+		
+		function downloadFile(formdata, fileType){
+			var url = 'http://192.168.2.4:9088/v1/auth//evidence/content/download'
+			$.ajax({
+					type: 'POST',
+					url: url,
+					data: formdata,
+					processData: false,
+					contentType: false,
+					xhrFields: {
+					    responseType : 'blob'
+					}
+				})
+				.done(function(data) {
+					// var a = document.createElement('a');
+					var fileName = new Date().getTime();
+					// a.download = fileName + '.' + fileType;
+					// a.href=window.URL.createObjectURL(data);
+					// a.click()
+					
+					
+					// saveAs(data,fileName + '.' + fileType);
+					
+						// var reader = new FileReader();
+						// reader.readAsDataURL(data);   // 转换为base64，可以直接放入a标签href
+						// reader.onload = function (e) {
+						// 	var a = document.createElement('a');   // 转换完成，创建一个a标签用于下载
+						// 	a.download = fileName+'.'+fileType;
+						// 	a.href = e.target.result;
+						// 	$("body").append(a);    // 修复firefox中无法触发click
+						// 	a.click();
+						// 	$(a).remove();
+						// }
+						
+						var link = document.createElement('a');
+						link.href = window.URL.createObjectURL(data);
+						link.download = fileName+'.' + fileType;
+						link.click();
+						window.URL.revokeObjectURL(link.href);
+						
+						
+				})
+				.fail(function(err){
+					console.log(err,'err')
+				})
+		}
+		
+		
+		function downloadPdf(formdata){
+			var url = 'http://192.168.2.4:9088/v1/auth/evidence/detail/query'
+			$.ajax({
+					type: 'POST',
+					url: url,
+					data: formdata,
+					processData: false,
+					contentType: false,
+					dataType:'json'
+				})
+				.done(function(data) {
+					var data = data.data;
+					var html = getPdfHtml(data)
+					$('#content').html(html)
+				})
+				.then(function(){
+					
+					html2canvas(
+						document.getElementById('content'), {
+							useCORS: true,
+						}
+					).then(function(canvas){
+						createPdf(canvas)
+					})
+					
+				})
+				.fail(function(err) {
+					console.log('error')
+				})
+		}
+		
+		function createPdf(canvas){
+			var img = new Image();
+　　　　　　　img.src = canvas.toDataURL() ;
+			
+			
+			var contentWidth = canvas.width;
+			var contentHeight = canvas.height;
+								
+			//一页pdf显示html页面生成的canvas高度;
+			var pageHeight = contentWidth / 592.28 * 841.89;
+			//未生成pdf的html页面高度
+			var leftHeight = contentHeight;
+			//页面偏移
+			var position = 0;
+			//a4纸的尺寸[595.28,841.89]，html页面生成的canvas在pdf中图片的宽高
+			var imgWidth = 595.28;
+			var imgHeight = 592.28 / contentWidth * contentHeight;
+								
+			var pageData = canvas.toDataURL('image/jpeg', 1.0);
+			
+								
+			var pdf = new jsPDF('', 'pt', 'a4');
+			//有两个高度需要区分，一个是html页面的实际高度，和生成pdf的页面高度(841.89)
+			//当内容未超过pdf一页显示的范围，无需分页
+			if (leftHeight < pageHeight) {
+				pdf.addImage(pageData, 'JPEG', 0, 0, imgWidth, imgHeight);
+			} else {
+				while (leftHeight > 0) {
+					pdf.addImage(pageData, 'JPEG', 0, position, imgWidth, imgHeight)
+					leftHeight -= pageHeight;
+					position -= 841.89;
+					//避免添加空白页
+					if (leftHeight > 0) {
+						pdf.addPage();
+					}
+				}
+			}
+			
+			
+			if(!IsPC()){
+				$('body').html(img)
+			}else{
+				pdf.save('aa.pdf');
+			}
+			
+		}
+		
+		
+
+		function getFuncTypeText(val) { // get funcType text
+			var json = {
+				"01": '录音取证',
+				"02": '录像取证',
+				"03": '拍照取证',
+				"04": '录屏取证',
+				"05": '文件存证',
+				"06": '内容存证',
+				"07": '网页取证'
+			}
+			return json[val]
+		}
+
+		function getPdfHtml(obj) {
+			return `
+		        <div class="main">
+					
+					<div style="font-size:20px;color:#f20;padding:30px 0 20px;">M0 | 电子取证确认函</div>
+					<div>
+						<div class="list">
+							<div class="left">所属区块链：</div>
+							<div class="right">M0</div>
+						</div>
+					</div>
+					
+					<div>
+						<div class="list">
+							<div class="left">取证号：</div>
+							<div class="right">${obj.accessNumber}</div>
+						</div>
+						<div class="list">
+							<div class="left">所在区块号：</div>
+							<div class="right">${obj.Blcok.blockHeight}</div>
+		                </div>
+		                <!---
+						<div class="list">
+							<div class="left">取证哈希：</div>
+							<div class="right">${obj.Blcok.blockHash}</div>
+		                </div>
+		                -->
+						<div class="list">
+							<div class="left">交易哈希：</div>
+							<div class="right">${obj.Blcok.transactionHash}</div>
+		                </div>
+		                <!---
+						<div class="list">
+							<div class="left">证据来源：</div>
+							<div class="right">${obj.accessSourse}</div>
+		                </div>
+		                -->
+						<div class="list">
+							<div class="left">取证名称：</div>
+							<div class="right">${obj.accessName}</div>
+						</div>
+						<div class="list">
+							<div class="left">取证类型：</div>
+							<div class="right">${getFuncTypeText(obj.funcType)}</div>
+		                </div>
+		                <!---
+						<div class="list">
+							<div class="left">取证时间：</div>
+							<div class="right">${obj.Blcok.blcokDate}</div>
+		                </div>
+		                -->
+						<div class="list">
+							<div class="left">上链时间：</div>
+							<div class="right">${obj.Blcok.blcokDate}</div>
+						</div>
+					</div>
+					
+					<div >
+						<p style="text-align:left;padding-top:30px;">证书说明：</p>
+						<p style="text-align:left;">1、如需对电子存证进行校验，请登录M0管理系统进行校验。</p>
+						<p style="text-align:left;">2、本文件仅系电子存证保管时所自动生成的信息汇集反馈，并不直接作为本机构出具的证明文书，如您需要对电子存证的相关信息作出司法存证明，敬请提出公证申请。</p>
+					</div>
+				</div>
+		    `
+		}
+	</script>
+
+</html>
