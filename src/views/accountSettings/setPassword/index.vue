@@ -35,7 +35,8 @@
           name="password2"
           tabindex="2"
           auto-complete="on"
-          @keyup.enter.native="handleLogin" />
+          @keyup.enter.native="_submit"
+        />
         <span class="show-pwd" @click="showPwd(2)">
           <svg-icon :icon-class="passwordType2 === 'password' ? 'eye' : 'eye-open'" />
         </span>

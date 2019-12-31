@@ -1,6 +1,13 @@
 <template>
   <div class="login-container">
-    <el-form ref="loginForm" :model="loginForm" :rules="loginRules" class="login-form" auto-complete="on" label-position="left">
+    <el-form
+      ref="loginForm"
+      :model="loginForm"
+      :rules="loginRules"
+      class="login-form"
+      auto-complete="on"
+      label-position="left"
+      @submit.native.prevent>
 
       <div class="title-container">
         <h3 class="title" style="padding-bottom:30px;">输入验证码</h3>
@@ -18,6 +25,7 @@
           type="text"
           tabindex="1"
           auto-complete="on"
+          @keyup.enter.native="_submit"
         />
       </el-form-item>
 
@@ -48,7 +56,7 @@
   } from '@/utils/validate'
 
   import { checkVerificationCode } from '@/api/user.js'
-  import { ACCOUNTREG, PASSWORDREG } from '@/utils/index.js'
+
   export default {
     name: 'Login',
     data() {
@@ -81,6 +89,7 @@
     methods: {
 
       _submit() {
+        console.log(111)
         this.$refs.loginForm.validate(valid => {
           if (valid) {
             this.loading = true

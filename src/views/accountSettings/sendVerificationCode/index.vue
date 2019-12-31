@@ -7,6 +7,7 @@
       class="login-form"
       auto-complete="on"
       label-position="left"
+      @submit.native.prevent
     >
 
       <div class="title-container">
@@ -102,7 +103,7 @@
               .then((data)=>{
                 if(data.error_code === 200){
                   const from = this.$route.query.from
-                  this.$router.replace({path:'checkVerifyCode', query:{from: from, email: email} });
+                  this.$router.replace({path:'/checkVerifyCode', query:{from: from, email: email} });
                 }
                 this.loading = false
 

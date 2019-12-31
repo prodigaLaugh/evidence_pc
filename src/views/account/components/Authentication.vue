@@ -49,6 +49,25 @@
       </div>
     </div>
 
+    <div class="successWrap"  v-if="verifyStatus==='01'">
+      <div class="imgWrap">
+        <img :src="userInfo.verify_type ===2 ? require('@/assets/account/verifyP.png') :require('@/assets/account/veriy.png')" alt="" />
+      </div>
+      <div class="rightWrap">
+        <div>
+          <img :src="require('@/assets/account/certification.png')" alt="">信息审核中...
+        </div>
+        <p>
+          {{ userInfo.verify_type === 1 ? '公司名称' : '真实姓名'}}：
+          {{verifyInfo.company_name || verifyInfo.real_name}}
+        </p>
+        <p>
+        {{userInfo.verify_type === 1 ? '社会信用代码' : '身份证号码' }}：
+        {{verifyInfo.company_credit_code || verifyInfo.id_number,}}
+        </p>
+      </div>
+    </div>
+
     <div class="failWrap"  v-else-if="verifyStatus==='03'">
       <div class="topTips">
          <svg-icon icon-class="warn" class="icon"/>

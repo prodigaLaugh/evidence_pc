@@ -160,7 +160,7 @@ export default {
   },
   methods: {
     addEvidence(){
-      if(this.verifyStatus === '00'){
+      if(this.verifyStatus === '00' || this.verifyStatus === '01'){
         Message({
           message: '请进入账户管理，完成认证！',
           type: 'error',
