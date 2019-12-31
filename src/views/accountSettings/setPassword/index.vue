@@ -164,24 +164,31 @@
               .then((data)=>{
                 if(data.error_code === 200){
                   var msg = this.from === 'origin' ? '设置成功' : '修改成功'
+                  var path = this.from === 'origin' ? '/' : '/login'
                   Message({
                     message: msg,
                     type: 'success',
                     duration: 2000
                   })
 
-                  setTimeout(()=>{
-                    this.$store.commit('SET_TOKEN', this.email)
-                    setToken(this.email)
+                  if(this.from === 'reset'){
+                      this.$store.commit('SET_TOKEN', '')
+                      setToken('')
+                  }else{
+                      this.$store.commit('SET_TOKEN', this.email)
+                      setToken(this.email)
+                  }
 
-                    this.$router.push({path: '/' });
+
+                  setTimeout(()=>{
+                    this.$router.replace({path: path });
                   },2000)
 
                 }else{
                   this.loading = false
                 }
 
-                
+
               })
               .catch((err)=>{
                 this.loading = false
