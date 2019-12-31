@@ -23,9 +23,6 @@ const mutations = {
   SET_USERINFO: (state, userInfo) => {
     state.userInfo = userInfo
   },
-  SET_USERINFO: (state, userInfo) => {
-    state.userInfo = userInfo
-  },
   SET_VERIFYSTATUS: (state, verifyStatus) => {
     state.verifyStatus = verifyStatus
   },

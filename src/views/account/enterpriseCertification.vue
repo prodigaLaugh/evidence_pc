@@ -193,7 +193,7 @@
             formdata.append('companyName', this.personForm.companyName)
             formdata.append('companyLocation', this.personForm.companyLocation)
             formdata.append('companyCreditCode', this.personForm.companyCreditCode)
-            formdata.append('tradingCertificate', this.tradingCertificate)
+            formdata.append('tradingCertificate', this.personForm.tradingCertificate)
 
           tradingCertificate: '',
 

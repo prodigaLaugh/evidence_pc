@@ -8,7 +8,8 @@
         <div class="person">
           <div class="nameWrap">
             <span>Hi，{{userInfo.name}}</span>
-            <span>{{ userInfo.verify_type === 1 ? '企业认证' : '个人认证'}}</span>
+            <span v-if="verifyStatus === '00'" style="color:#999">未认证</span>
+            <span v-else>{{ userInfo.verify_type === 1 ? '企业认证' : '个人认证'}}</span>
           </div>
           <div class="time">今天是{{time}}，周{{week}}，欢迎回到M0~</div>
         </div>
@@ -165,6 +166,7 @@ export default {
     ...mapGetters([
       'avatar',
       'userInfo',
+      'verifyStatus'
     ])
   },
   data(){

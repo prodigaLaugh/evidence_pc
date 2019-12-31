@@ -171,7 +171,8 @@ div:focus {
   .operBtnWrap{
     display:flex;
     align-items: center;
-    >span{
+    >span,
+	>a{
       color: $color_blue;
       cursor:pointer;
       &.line{

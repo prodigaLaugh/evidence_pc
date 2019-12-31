@@ -142,7 +142,9 @@
       const validateIdNumbere = (rule, value, callback) => {
         if (!validUsername(value)) {
           callback(new Error('请输入身份证号码'))
-        } else {
+        } else if(!/^\d{17}(\d|x)$/i.test(value)){
+           callback(new Error('请输入正确的身份证号码'))
+        }else {
           callback()
         }
       }
@@ -204,8 +206,8 @@
             formdata.append('email', this.personForm.email)
             formdata.append('realName', this.personForm.realName)
             formdata.append('idNumber', this.personForm.idNumber)
-            formdata.append('idObverseSide', this.idObverseSide)
-            formdata.append('idReverseSide', this.idReverseSide)
+            formdata.append('idObverseSide', this.personForm.idObverseSide)
+            formdata.append('idReverseSide', this.personForm.idReverseSide)
 
 
             personalAuthentication(formdata)

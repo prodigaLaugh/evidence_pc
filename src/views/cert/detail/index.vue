@@ -25,7 +25,7 @@
               <p>共享对象：{{ info.shareTarget || '--'}}</p>
             </el-col>
             <el-col :span="12">
-              <p>确认函： <span style="color:#2D7FEB;cursor:pointer;">立即查看</span></p>
+              <p>确认函： <a :href="`http://192.168.2.4:9008?accessNumber=${info.accessNumber}&email=${userInfo.email}&fileType=`" target="_blank" style="color:#2D7FEB;cursor:pointer;">立即查看</a>></p>
             </el-col>
           </el-row>
         </div>

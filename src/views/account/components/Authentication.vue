@@ -4,7 +4,7 @@
       <div class="topTips">
          <svg-icon icon-class="warn" class="icon"/>
         <span>
-          温馨提示：温馨提示：当前阶段，您尚未完成实名认证，无法购买和使用资源，请先完成认证！
+          温馨提示：当前阶段，您尚未完成实名认证，无法使用资源，请先完成认证！
         </span>
       </div>
       <div class="contentWrap">
@@ -127,10 +127,10 @@ export default {
           title: '个人用户',
           image:require('@/assets/account/verifyP.png'),
           text:[
-            '可按需求拓展资源，即可随时删除退费',
+            '可按需求拓展资源',
             '可随时增加存证数目',
-            '免费提供10次存证',
-            '免费提供10次取证',
+            // '免费提供10次存证',
+            // '免费提供10次取证',
           ],
           path: '/account/person',
         },
@@ -138,11 +138,11 @@ export default {
           title: '企业用户',
           image:require('@/assets/account/veriy.png'),
           text:[
-            '可按需求拓展资源，即可随时删除退费',
+            '可按需求拓展资源',
             '可随时增加存证数目',
-            '免费提供100次存证',
-            '500M存证文件空间',
-            '免费提供10次取证',
+            // '免费提供100次存证',
+            // '500M存证文件空间',
+            // '免费提供10次取证',
           ],
           path: '/account/company',
         }

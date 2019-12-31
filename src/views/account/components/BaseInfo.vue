@@ -21,12 +21,12 @@
           用户名：
           {{userInfo.name || '--'}} &nbsp;
 
-          <img
+          <!-- <img
             :src="verifyStatus==='02' ? require('@/assets/account/certification.png'):require('@/assets/account/noCertification.png')"
             alt=""
             width="20"
             height="20"
-          />
+          /> -->
         </div>
 
         <div>注册时间： {{userInfo.create_date || '--'}}</div>

@@ -77,7 +77,7 @@
           </el-table-column>
           <el-table-column align="center" prop="created_at" label="存证来源" width="200">
             <template slot-scope="scope">
-              <span>{{ scope.row.asscess_source || '--'}}</span>
+              <span>{{ scope.row.access_sourse || '--'}}</span>
             </template>
           </el-table-column>
           <el-table-column label="操作">
@@ -87,7 +87,8 @@
                <span class="line"></span>
                <!-- <span>分享</span>
                <span class="line"></span> -->
-               <span>查看确认函</span>
+               <!-- <span @click="openPdf({accessNumber: scope.row.access_number, email: userInfo.email, fileType: ''})">查看确认函</span> -->
+               <a :href="`http://192.168.2.4:9008?accessNumber=${scope.row.access_number}&email=${userInfo.email}&fileType=`" target="_blank">查看确认函</a>
              </div>
             </template>
 

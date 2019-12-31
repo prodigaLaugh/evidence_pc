@@ -86,7 +86,8 @@
                  <span class="line"></span>
                  <!-- <span>分享</span>
                  <span class="line"></span> -->
-                 <span>查看确认函</span>
+                 <!-- <span>查看确认函</span> -->
+                  <a :href="`http://192.168.2.4:9008?accessNumber=${scope.row.access_number}&email=${userInfo.email}&fileType=`" target="_blank">查看确认函</a>
                </div>
               </template>
           </el-table-column>
