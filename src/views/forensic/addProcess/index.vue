@@ -213,6 +213,8 @@ export default {
       formdata.append('accessName', this.addParams.accessName)
       formdata.append('privateKeyFile', this.addParams.privateKeyFile)
       formdata.append('evidenceFile', this.addParams.evidenceFile)
+      formdata.append('fileType', 'webm')
+      
 
       formdata.append('funcType', this.addParams.funcType)
       return formdata

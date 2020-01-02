@@ -54,18 +54,18 @@
           fit
           highlight-current-row
         >
-          <el-table-column align="center" label="存证号" width="166">
+          <el-table-column align="center" label="存证号" width="180">
             <template slot-scope="scope">
               {{ scope.row.access_number }}
             </template>
           </el-table-column>
 
-          <el-table-column label="存证名称"  align="center">
+          <el-table-column label="存证名称"  align="center" >
             <template slot-scope="scope">
               <span>{{ scope.row.access_name }}</span>
             </template>
           </el-table-column>
-          <el-table-column label="共享对象" width="110" align="center">
+          <el-table-column label="共享对象" width="200" align="center">
             <template slot-scope="scope">
               {{ scope.row.share_target || '--' }}
             </template>
@@ -75,12 +75,12 @@
               {{scope.row.access_date}}
             </template>
           </el-table-column>
-          <el-table-column align="center" prop="created_at" label="存证来源" width="200">
+          <el-table-column align="center" prop="created_at" label="存证来源" width="100">
             <template slot-scope="scope">
               <span>{{ scope.row.access_sourse || '--'}}</span>
             </template>
           </el-table-column>
-          <el-table-column label="操作">
+          <el-table-column label="操作" width="160">
             <template slot-scope="scope">
              <div class="operBtnWrap">
                <span  @click="$router.push({path:'/cert/detail', query: {accessNumber: scope.row.access_number} })">详情</span>
@@ -100,6 +100,7 @@
             background
             layout="prev, pager, next"
             @current-change="loadData"
+            :page-size="20"
             :total="total">
           </el-pagination>
         </div>

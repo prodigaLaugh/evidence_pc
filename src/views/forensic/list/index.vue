@@ -53,7 +53,7 @@
           fit
           highlight-current-row
         >
-          <el-table-column align="center" label="取证号" width="170">
+          <el-table-column align="center" label="取证号" width="180">
             <template slot-scope="scope">
               {{ scope.row.access_number }}
             </template>
@@ -74,12 +74,12 @@
               {{ scope.row.access_date }}
             </template>
           </el-table-column>
-          <el-table-column align="center" prop="created_at" label="取证类型" width="200">
+          <el-table-column align="center" prop="created_at" label="取证类型" width="120">
             <template slot-scope="scope">
               {{ scope.row.func_type | getFuncTypeText }}
             </template>
           </el-table-column>
-          <el-table-column label="操作">
+          <el-table-column label="操作" width="160">
               <template slot-scope="scope">
                <div class="operBtnWrap">
                  <span  @click="$router.push({path:'/forensic/detail', query: {accessNumber: scope.row.access_number} })">详情</span>
@@ -98,6 +98,7 @@
             background
             layout="prev, pager, next"
             @current-change="loadData"
+            :page-size="20"
             :total="total">
           </el-pagination>
         </div>
@@ -130,7 +131,7 @@ export default {
       params:{
         offset: 0,
         limit: 20,
-        funcType:['01', '02', '03', '04', '07'],
+        funcType:['01', '02', '03', '04', '07', '08'],
       },
       executeChainStartDate: '',
       executeChainEndDate: '',

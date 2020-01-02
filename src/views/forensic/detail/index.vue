@@ -1,10 +1,14 @@
 <template>
   <div class="containerWrap forensicDetail">
-    <div class="container">
+    <div class="container" v-if="info.accessNumber">
       <div class="topBtnWrap">
         <!-- <el-button>取证校验</el-button>
         <el-button>申请公证</el-button>
         <el-button>证据包下载</el-button> -->
+        <el-button>
+          <a :href="`http://192.168.2.4:9008?accessNumber=${info.accessNumber}&email=${userInfo.email}&fileType=${info.fileType}&accessName=${info.accessName}`" target="_blank" style="color:#2D7FEB;cursor:pointer;">证据包下载</a>
+        </el-button> 
+        
       </div>
 
       <div class="cerInfoWrap">

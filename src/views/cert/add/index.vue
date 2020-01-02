@@ -255,6 +255,7 @@ export default {
       var file = upload.files[0]
       this[dom] = file.name;
       this.addParams[dom] = file;
+     
       // var reader = new FileReader()
       // reader.readAsDataURL(file)
       // reader.onload = (e) =>{
@@ -271,6 +272,7 @@ export default {
       formdata.append('privateKeyFile', this.addParams.privateKeyFile)
       if(this.index === 0){
         formdata.append('evidenceFile', this.addParams.evidenceFile)
+        formdata.append('fileType', this.addParams.evidenceFile.name.replace(/.*(?:\.)([^\.]+)/,'$1'))
       }else{
         formdata.append('depositContent', this.addParams.depositContent)
       }

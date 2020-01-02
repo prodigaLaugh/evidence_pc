@@ -47,8 +47,65 @@
 				font-size: 16px;
 				word-break: break-all;
 			}
+			
+			
+			/* download file style */
+			.header{
+				height:48px;
+				background:#fff;
+				position:fixed;
+				left:0;
+				right:0;
+				top:0;
+				z-index: 10;
+				overflow:hidden;
+				padding:0 20px;
+			}
+			.headerLeft{
+				float:left;
+				line-height:48px;
+				font-size:16px;
+				color:#333;
+			}
+			.headerRight{
+				float:right;
+				padding:9px 15px;
+				border:1px solid #ddd;
+				font-size:14px;
+				line-height:14px;
+				color:#666;
+				margin-top:6px;
+				cursor:pointer;
+			}
+			.headerRight a{
+				text-decoration: none;
+				color:#666;
+			}
+			.fileWrap{
+				position:fixed;
+				left:0;
+				top:48px;
+				right:0;
+				bottom:0;
+				min-height:400px;
+				background:gray;
+				padding:20px 0 80px;
+				overflow-y:auto;
+				
+			}
+			.fileContent{
+				background:#fff;
+				padding:20px;
+				width:700px;
+				margin:0 auto;
+				min-height:300px;
+				text-align:left;
+				font-size:14px;
+				line-height:22px;
+			}
+			
 		</style>
-		<script src="./js/fileSave.js"></script>
+		<!-- <script src="./js/fileSave.js"></script> -->
 		<script src="./js/html2canvas.min.js"></script>
 		<script src="//cdnjs.cloudflare.com/ajax/libs/jspdf/1.5.3/jspdf.debug.js" integrity="sha384-NaWTHo/8YCBYJ59830LTz/P4aQZK1sS0SneOgAvhsIl3zBu8r9RevNg5lHCHAuQ/"
 		 crossorigin="anonymous"></script>
@@ -57,7 +114,9 @@
 	</head>
 	<body>
 
-		<div id="content"></div>
+		<div id="content">
+			
+		</div>
 
 	</body>
 
@@ -76,35 +135,33 @@
 		   }
 		   return flag;
 		}
+		
+		
+		
 		$(function() {
-			
 			if(IsPC()){
 				$('body').css({width:'600px',margin:'0 auto'})
 			}
-			
 			var search = window.location.search;
 			var fileType = search.replace(/.*(?:fileType=)([^&]*)(.*)?/,'$1')
 			var email = search.replace(/.*(?:email=)([^&]*)(.*)?/,'$1')
 			var accessNumber = search.replace(/.*(?:accessNumber=)([^&]*)(.*)?/,'$1')
+			var accessName = search.replace(/.*(?:accessName=)([^&]*)(.*)?/,'$1')
 
 			var formdata = new FormData()
 			formdata.append('email', email)
 			formdata.append('accessNumber', accessNumber)
 			
-			
-			
-			if(fileType){
-				downloadFile(formdata, fileType)
+			if(!fileType && !accessName){
+				downLoadPdf(formdata)
 			}else{
-				downloadPdf(formdata)
+				downloadFile(formdata, fileType, accessName)
 			}
-
-
-
 
 		})
 		
-		function downloadFile(formdata, fileType){
+		
+		function downloadFile(formdata, fileType, accessName){
 			var url = 'http://192.168.2.4:9088/v1/auth/evidence/content/download'
 			$.ajax({
 					type: 'POST',
@@ -117,32 +174,62 @@
 					}
 				})
 				.done(function(data) {
-					// var a = document.createElement('a');
-					var fileName = new Date().getTime();
-					// a.download = fileName + '.' + fileType;
-					// a.href=window.URL.createObjectURL(data);
-					// a.click()
 					
-					
-					// saveAs(data,fileName + '.' + fileType);
-					
-						// var reader = new FileReader();
-						// reader.readAsDataURL(data);   // 转换为base64，可以直接放入a标签href
-						// reader.onload = function (e) {
-						// 	var a = document.createElement('a');   // 转换完成，创建一个a标签用于下载
-						// 	a.download = fileName+'.'+fileType;
-						// 	a.href = e.target.result;
-						// 	$("body").append(a);    // 修复firefox中无法触发click
-						// 	a.click();
-						// 	$(a).remove();
-						// }
+					if(!fileType ){
+						data.text().then(text =>  {
+							<!-- <span class="headerRight">下载文件</span> -->
+							var html =  renderHtml(data, accessName, fileType, 'text', text)
+							$('#content').html(html)
+						});
+					}else{
+						var type = '', content = '';
 						
-						var link = document.createElement('a');
-						link.href = window.URL.createObjectURL(data);
-						link.download = fileName+'.' + fileType;
-						link.click();
-						window.URL.revokeObjectURL(link.href);
-						
+						if(
+							fileType === 'jpeg' ||
+							fileType === 'jpg' ||
+							fileType === 'png' ||
+							fileType === 'gif' 
+						){
+							type = 'img'
+							content = window.URL.createObjectURL(data)
+							
+						}else{
+							type = 'text'
+							content = '该文件类型不支持预览'
+						}
+						var html =  renderHtml(data, accessName, fileType, type, content)
+						$('#content').html(html)
+						download(data, fileType)
+					}
+					
+					
+					function renderHtml(data, accessName, fileType, type, text){
+						var content =  type === 'img'
+									? `<img src="${text}" alt="" style="width:100%">`
+									: text
+									
+						return	`
+									<div class="header">
+										<span class="headerLeft">${accessName}</span>
+										<span class="headerRight">
+											${download(data,fileType)}
+										</span>
+									</div>
+									<div class="fileWrap">
+										<div class="fileContent">
+											${content}
+										</div>
+									</div>
+								`
+					}
+					
+					
+					function download(data, fileType){
+						var fileName = new Date().getTime();
+						var href = window.URL.createObjectURL(data);
+						return `<a href="${href}" download="${fileName}.${fileType}">下载文件</a>`
+					}
+					
 						
 				})
 				.fail(function(err){
@@ -151,7 +238,10 @@
 		}
 		
 		
-		function downloadPdf(formdata){
+		
+		
+		//download pdf 
+		function downLoadPdf(formdata){
 			var url = 'http://192.168.2.4:9088/v1/auth/evidence/detail/query'
 			$.ajax({
 					type: 'POST',
@@ -163,11 +253,9 @@
 				})
 				.done(function(data) {
 					var data = data.data;
+					
 					var html = getPdfHtml(data)
 					$('#content').html(html)
-				})
-				.then(function(){
-					
 					html2canvas(
 						document.getElementById('content'), {
 							useCORS: true,
@@ -181,6 +269,8 @@
 					console.log('error')
 				})
 		}
+		
+	
 		
 		function createPdf(canvas){
 			var img = new Image();
@@ -224,7 +314,8 @@
 			if(!IsPC()){
 				$('body').html(img)
 			}else{
-				pdf.save('aa.pdf');
+				var fileName = new Date().getTime();
+				pdf.save(fileName+'.pdf');
 			}
 			
 		}

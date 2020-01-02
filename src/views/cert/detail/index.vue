@@ -2,8 +2,10 @@
   <div class="containerWrap certDetail">
     <div class="container"  v-loading="listLoading">
       <div class="topBtnWrap">
-       <!-- <el-button>存证查看</el-button>
-        <el-button>存证校验</el-button>
+       <el-button>
+        <a :href="`http://192.168.2.4:9008?accessNumber=${info.accessNumber}&email=${userInfo.email}&fileType=${info.fileType}&accessName=${info.accessName}`" target="_blank" style="color:#2D7FEB;cursor:pointer;">存证查看</a>
+       </el-button>
+       <!-- <el-button>存证校验</el-button>
         <el-button>申请公证</el-button> -->
       </div>
 
@@ -25,12 +27,12 @@
               <p>共享对象：{{ info.shareTarget || '--'}}</p>
             </el-col>
             <el-col :span="12">
-              <p>确认函： <a :href="`http://192.168.2.4:9008?accessNumber=${info.accessNumber}&email=${userInfo.email}&fileType=`" target="_blank" style="color:#2D7FEB;cursor:pointer;">立即查看</a>></p>
+              <p>确认函： <a :href="`http://192.168.2.4:9008?accessNumber=${info.accessNumber}&email=${userInfo.email}&fileType=`" target="_blank" style="color:#2D7FEB;cursor:pointer;">立即查看</a></p>
             </el-col>
           </el-row>
         </div>
 
-        <div class="cerInfoListWrap">
+        <div class="cerInfoListWrap" v-if="info.Blcok">
           <div class="title">区块链信息</div>
           <Detail
             :leftText="'上链时间：'+ info.Blcok.blcokDate "
