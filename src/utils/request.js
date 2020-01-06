@@ -3,9 +3,15 @@ import { MessageBox, Message } from 'element-ui'
 import store from '@/store'
 // import { getToken } from '@/utils/auth'
 
+var href = window.location.href.replace(/(http:\/\/[^:\/]*).*/,'$1') ;
+		href = href + ':9088'
+    
+const baseUrl = process.env.NODE_ENV === "development" 
+                  ? process.env.VUE_APP_BASE_API
+                  : href
 // create an axios instance
 const service = axios.create({
-  baseURL: process.env.VUE_APP_BASE_API, // url = base url + request url
+  baseURL: baseUrl, // url = base url + request url
   // withCredentials: true, // send cookies when cross-domain requests
   timeout: 60000 ,// request timeout
   validateStatus: function (status) {

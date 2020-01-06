@@ -1,0 +1,12 @@
+FROM ubuntu
+LABEL maintainer "zhengcunjie@163.com"
+
+RUN apt-get -y update && apt-get -y install nginx 
+
+ADD default /etc/nginx/sites-enabled/
+ADD build.tar.gz /usr/share/nginx/html/
+
+
+
+EXPOSE 8082
+ENTRYPOINT  ["nginx","-g","daemon off;"]
